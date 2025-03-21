@@ -4,7 +4,6 @@ const Inicio = () => {
   return (
     <Layout>
 
-
     </Layout>
   )
 }
