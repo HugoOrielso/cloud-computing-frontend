@@ -1,9 +1,11 @@
+import Layout from "./Layout"
 
 const Inicio = () => {
   return (
-    <div className="bg-red-500 min-h ">
-        
-    </div>
+    <Layout>
+
+
+    </Layout>
   )
 }
 
