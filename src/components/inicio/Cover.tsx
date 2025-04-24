@@ -10,7 +10,7 @@ const Cover = () => {
                 <div  className="inline-flex border-emerald-600 text-emerald-600">
                     Soluciones de Hosting Web Profesional
                 </div>
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                <h1 className="text-3xl text-white font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     El mejor espacio para tu sitio web
                 </h1>
                 <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">

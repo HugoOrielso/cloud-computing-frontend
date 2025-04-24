@@ -1,6 +1,6 @@
 import { Server } from 'lucide-react'
-import Features from '../components/inicio/Features'
-import Cover from '../components/inicio/Cover'
+import Features from '../../../components/inicio/Features'
+import Cover from '../../../components/inicio/Cover'
 
 const Inicio = () => {
     return (
