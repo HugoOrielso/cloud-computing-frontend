@@ -7,16 +7,12 @@ import { toast } from 'sonner';
 const Login = () => {
   const axiosAuth = useAxiosAuth();
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget)) as { email: string, password: string };
-    console.log(data);
     const { email, password } = data;
-
 
     if (!email || !password) {
       toast.error('Por favor, completa todos los campos');
@@ -30,14 +26,13 @@ const Login = () => {
       if(request.status === 200) {
         console.log(request.data);
         toast.success('Inicio de sesión exitoso');
-        
         navigate('/dashboard');
       }
     }catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || 'Error al iniciar sesión');
+        toast.error("Error al iniciar sesión")
       } else {
-        setError('Error inesperado');
+        toast.error('Error inesperado');
       }
     } finally {
       setLoading(false);
@@ -65,9 +60,6 @@ const Login = () => {
 
       <form onSubmit={handleLogin} className="bg-white p-8 mt-12 rounded shadow-md w-full max-w-md space-y-6">
         <h2 className="text-2xl font-bold text-center text-gray-800">Iniciar Sesión</h2>
-
-        {error && <p className="text-red-600 text-sm text-center">{error}</p>}
-
         <input 
           name="email"
           type="email"
@@ -87,7 +79,7 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 transition-colors disabled:opacity-50"
+          className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 transition-colors disabled:opacity-50 cursor-pointer"
         >
           {loading ? 'Cargando...' : 'Entrar'}
         </button>

@@ -1,276 +1,254 @@
-import { Check, GitBranch, Github, Play, RefreshCw } from 'lucide-react'
-import { useState } from 'react'
+import React from 'react'
+import { useState, useRef } from "react"
+import { Upload, FolderUp, FileUp, X, Check, AlertCircle, Loader2 } from "lucide-react"
+import { useAxiosAuth } from '../../../hooks/useAxiosHook';
+import { toast } from 'sonner';
+import axios from 'axios';
 
 const Deploy = () => {
+    const axiosAuth = useAxiosAuth();
+    const [isDragging, setIsDragging] = useState(false)
+    const [files, setFiles] = useState<File[]>([])
+    const [uploading, setUploading] = useState(false)
+    const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle")
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const [deploymentName, setDeploymentName] = useState("")
-    const [repositoryUrl, setRepositoryUrl] = useState("")
-    const [branch, setBranch] = useState("main")
-    const [isDeploying, setIsDeploying] = useState(false)
-  
-
-  
-    const handleDeploy = (e: { preventDefault: () => void }) => {
-      e.preventDefault()
-      if (!deploymentName || !repositoryUrl) return
-  
-      setIsDeploying(true)
-  
-      // Simulación de despliegue
-      setTimeout(() => {
-        setIsDeploying(false)
-        setDeploymentName("")
-        setRepositoryUrl("")
-        setBranch("main")
-      }, 3000)
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(true)
     }
-  
-  return (
-    <div className="flex flex-col w-full gap-6">
-    <div className="lg:col-span-2">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold">Desplegar Nuevo Proyecto</h2>
-          <p className="text-gray-500 mt-1">Configura y despliega tu aplicación en nuestra plataforma</p>
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(false)
+    }
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(false)
+
+        if (e.dataTransfer.items) {
+            const newFiles: File[] = []
+            for (let i = 0; i < e.dataTransfer.files.length; i++) {
+                newFiles.push(e.dataTransfer.files[i])
+            }
+
+            setFiles([...files, ...newFiles])
+        }
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const newFiles: File[] = []
+
+            for (let i = 0; i < e.target.files.length; i++) {
+                newFiles.push(e.target.files[i])
+            }
+
+            setFiles([...files, ...newFiles])
+        }
+    }
+
+    const removeFile = (index: number) => {
+        const newFiles = [...files]
+        newFiles.splice(index, 1)
+        setFiles(newFiles)
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (files.length === 0) return;
+    
+        const data = Object.fromEntries(new FormData(e.currentTarget)) as { projectName: string };
+        const { projectName } = data;
+        if(!projectName){
+            toast.warning("Por favor provee un nombre para tu proyectoñ")
+        }
+        setUploading(true);
+    
+        try {
+            const formData = new FormData();
+            files.forEach((file) => {
+                formData.append("files", file); 
+            });
+            formData.append("projectName", projectName)
+            const response = await axiosAuth.post("/files/upload", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            if (response.status === 200) {
+                toast.success("Archivos subidos correctamente");
+                setFiles([]);
+            }
+            setUploadStatus("success");
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                toast.error("Error subiendo los archivos: " + err.response?.data?.message || "Sin detalles");
+            } else {
+                toast.error("Error inesperado");
+            }
+            setUploadStatus("error");
+        } finally {
+            setUploading(false);
+        }
+    };
+    
+    return (
+        <div className='p-4'>
+            <h1 className="text-xl font-semibold mb-4">Subir Carpeta con Archivos</h1>
+            <section className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+
+                <form onSubmit={handleSubmit} className='gap-2 flex flex-col w-full'>
+                    <div>
+                        <label htmlFor="projectName">
+                            Nombre del proyecto:
+                            <input required type="text" id='projectName' name='projectName' className='p-2 border border-gray-300 w-full rounded focus:border-emerald-400 transition duration-200'  />
+                        </label>
+                    </div>
+                    <div
+                        className={`border-2 border-dashed rounded-lg p-8 text-center ${isDragging ? "border-emerald-500 bg-emerald-50" : "border-gray-300 hover:border-emerald-400"} transition-colors duration-200`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                    >
+                        <div className="flex flex-col items-center justify-center">
+                            <FolderUp className="h-12 w-12 text-emerald-500 mb-3" />
+                            <h3 className="text-lg font-medium mb-2">Arrastra y suelta tu carpeta aquí</h3>
+                            <p className="text-gray-500 mb-4">O selecciona los archivos manualmente</p>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                                multiple
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="bg-emerald-500 text-white py-2 px-4 rounded hover:bg-emerald-600 transition flex items-center cursor-pointer"
+                            >
+                                <FileUp className="mr-2 h-5 w-5" />
+                                Seleccionar Carpeta
+                            </button>
+                        </div>
+                    </div>
+
+                    {files.length > 0 && (
+                        <div className="mt-6">
+                            <h3 className="text-lg font-medium mb-3">Archivos seleccionados ({files.length})</h3>
+                            <div className="border rounded-lg overflow-hidden">
+                                <div className="max-h-[300px] overflow-y-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                                >
+                                                    Nombre
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                                >
+                                                    Tamaño
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                                >
+                                                    Tipo
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                                >
+                                                    Acción
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {files.map((file, index) => (
+                                                <tr key={index}>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        {file.name}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {(file.size / 1024).toFixed(2)} KB
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {file.type || "Carpeta"}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeFile(index)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            <X className="h-5 w-5" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {uploadStatus !== "idle" && (
+                        <div
+                            className={`mt-4 p-4 rounded-lg ${uploadStatus === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                                }`}
+                        >
+                            <div className="flex items-center">
+                                {uploadStatus === "success" ? (
+                                    <Check className="h-5 w-5 mr-2" />
+                                ) : (
+                                    <AlertCircle className="h-5 w-5 mr-2" />
+                                )}
+                                <p>
+                                    {uploadStatus === "success"
+                                        ? "Archivos subidos correctamente"
+                                        : "Error al subir los archivos. Intente nuevamente."}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Botón de envío */}
+                    <div className="mt-6 flex justify-end">
+                        <button
+                            type="submit"
+                            disabled={files.length === 0 || uploading}
+                            className={`py-2 px-6 rounded flex items-center ${files.length === 0
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-emerald-500 text-white hover:bg-emerald-600"
+                                } transition`}
+                        >
+                            {uploading ? (
+                                <button className='flex cursor-pointer'>
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    <span>
+                                        Subiendo...
+                                    </span>
+                                </button>
+                            ) : (
+                                <button className='flex cursor-pointer'>
+                                    <Upload className="mr-2 h-5 w-5" />
+                                    <span>
+                                        Subir Archivos
+                                    </span>
+                                </button>
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </section>
         </div>
-        <form onSubmit={handleDeploy} className="p-6">
-          <div className="space-y-6">
-            <div>
-              <label htmlFor="project-name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre del Proyecto
-              </label>
-              <input
-                type="text"
-                id="project-name"
-                value={deploymentName}
-                onChange={(e) => setDeploymentName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="mi-aplicacion"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="repository" className="block text-sm font-medium text-gray-700 mb-1">
-                Repositorio Git
-              </label>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 py-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                  <Github className="h-5 w-5" />
-                </span>
-                <input
-                  type="text"
-                  id="repository"
-                  value={repositoryUrl}
-                  onChange={(e) => setRepositoryUrl(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  placeholder="https://github.com/usuario/repositorio"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-1">
-                Rama
-              </label>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 py-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
-                  <GitBranch className="h-5 w-5" />
-                </span>
-                <input
-                  type="text"
-                  id="branch"
-                  value={branch}
-                  onChange={(e) => setBranch(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  placeholder="main"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="framework" className="block text-sm font-medium text-gray-700 mb-1">
-                  Framework
-                </label>
-                <select
-                  id="framework"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                >
-                  <option value="auto">Detección automática</option>
-                  <option value="nextjs">Next.js</option>
-                  <option value="react">React</option>
-                  <option value="vue">Vue</option>
-                  <option value="angular">Angular</option>
-                  <option value="node">Node.js</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="node-version" className="block text-sm font-medium text-gray-700 mb-1">
-                  Versión de Node.js
-                </label>
-                <select
-                  id="node-version"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                >
-                  <option value="18">Node.js 18.x (LTS)</option>
-                  <option value="20">Node.js 20.x (LTS)</option>
-                  <option value="16">Node.js 16.x</option>
-                  <option value="14">Node.js 14.x</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Configuración Avanzada</label>
-              <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                <div className="flex items-center">
-                  <input
-                    id="auto-deploy"
-                    name="auto-deploy"
-                    type="checkbox"
-                    className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="auto-deploy" className="ml-2 block text-sm text-gray-700">
-                    Despliegue automático en cada push
-                  </label>
-                </div>
-                <div className="flex items-center mt-3">
-                  <input
-                    id="build-cache"
-                    name="build-cache"
-                    type="checkbox"
-                    className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                    defaultChecked
-                  />
-                  <label htmlFor="build-cache" className="ml-2 block text-sm text-gray-700">
-                    Habilitar caché de compilación
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 mr-3"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isDeploying}
-                className={`px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 flex items-center ${
-                  isDeploying ? "bg-emerald-400" : "bg-emerald-600 hover:bg-emerald-700"
-                }`}
-              >
-                {isDeploying ? (
-                  <>
-                    <RefreshCw className="animate-spin h-4 w-4 mr-2" />
-                    Desplegando...
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4 mr-2" />
-                    Desplegar Proyecto
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    {/* Deployment Info */}
-    <div>
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
-        <div className="p-6 border-b">
-          <h3 className="font-semibold">Recursos Disponibles</h3>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">CPU</span>
-                <span className="text-sm text-gray-500">2 vCPUs</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div className="bg-emerald-600 h-2.5 rounded-full" style={{ width: "25%" }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Memoria</span>
-                <span className="text-sm text-gray-500">4 GB</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div className="bg-emerald-600 h-2.5 rounded-full" style={{ width: "50%" }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Almacenamiento</span>
-                <span className="text-sm text-gray-500">20 GB SSD</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div className="bg-emerald-600 h-2.5 rounded-full" style={{ width: "75%" }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">Ancho de banda</span>
-                <span className="text-sm text-gray-500">1 TB / mes</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div className="bg-emerald-600 h-2.5 rounded-full" style={{ width: "30%" }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 border-b">
-          <h3 className="font-semibold">Despliegues Recientes</h3>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                <Check className="h-6 w-6 text-emerald-600" />
-              </div>
-              <div className="ml-4">
-                <h4 className="text-sm font-medium">api-gateway</h4>
-                <p className="text-xs text-gray-500">Desplegado hace 5 minutos</p>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                <Check className="h-6 w-6 text-emerald-600" />
-              </div>
-              <div className="ml-4">
-                <h4 className="text-sm font-medium">frontend-dashboard</h4>
-                <p className="text-xs text-gray-500">Desplegado hace 30 minutos</p>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                <RefreshCw className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <h4 className="text-sm font-medium">auth-service</h4>
-                <p className="text-xs text-gray-500">Desplegando...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  )
+    )
 }
 
 export default Deploy

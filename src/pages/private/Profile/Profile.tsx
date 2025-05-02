@@ -1,5 +1,5 @@
 import Layout from '../../../components/Layout'
-import MenuUser from '../dashboard/MenuUser'
+import MenuUser from '../Dashboard/MenuUser'
 
 const Profile = () => {
   return (

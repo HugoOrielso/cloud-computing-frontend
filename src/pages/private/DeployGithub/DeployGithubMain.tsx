@@ -1,18 +1,18 @@
 import Layout from '../../../components/Layout'
 import MenuUser from '../dashboard/MenuUser'
-import Deploy from './Deploy'
+import DeployGithub from './DeployGithub'
 
-const DeployMain = () => {
+const DeployGithubMain = () => {
   return (
     <Layout>
       <div className="h-full w-full">
         <MenuUser />
       </div>
       <div className="h-full w-full overflow-y-auto">
-        <Deploy/>
+        <DeployGithub />
       </div>
     </Layout>
   )
 }
 
-export default DeployMain
+export default DeployGithubMain

@@ -7,10 +7,8 @@ const PrivateLayout = () => {
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
 
   useEffect(() => {
-    
-    axiosAuth.get('/users/me')
+    axiosAuth.get('/users/auth')
       .then(() =>  
-        
         setIsAuth(true))
       .catch((e) => {console.log(e)
        setIsAuth(false)});
