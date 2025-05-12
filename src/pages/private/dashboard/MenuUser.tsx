@@ -1,4 +1,4 @@
-import { Server, Users, LayoutDashboard, Upload, FolderKanban, LogOut } from "lucide-react";
+import { Server, LayoutDashboard, Upload, FolderKanban, LogOut } from "lucide-react";
 import { useAxiosAuth } from "../../../hooks/useAxiosHook";
 import { useLocation } from "react-router-dom";
 
@@ -28,12 +28,7 @@ const MenuUser = () => {
       label: "Subir proyecto",
       href: "/dashboard/deploy",
       icon: Upload,
-    },
-    {
-      label: "Perfil",
-      href: "/dashboard/profile",
-      icon: Users,
-    },
+    }
   ];
 
   return (

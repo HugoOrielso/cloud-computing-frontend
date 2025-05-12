@@ -2,7 +2,8 @@ import { toast } from "sonner";
 import { useAxiosAuth } from "../../../hooks/useAxiosHook";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Calendar, Clock, Code, FolderOpen, MoreVertical, Users } from "lucide-react";
+import { Calendar, Clock, FolderOpen, Globe, MoreVertical, Users } from "lucide-react";
+import NoProjects from "./NoProjects";
 
 const MyProjects = () => {
 
@@ -16,6 +17,9 @@ const MyProjects = () => {
             if (request.status === 200) {
                 setProjects(request.data.projects)
                 toast.success("Lista de proyectos, obtenida")
+            }
+            if (request.status === 204) {
+                toast.info("No tienes ningún proyecto desplegado")
             }
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
@@ -33,11 +37,11 @@ const MyProjects = () => {
 
     return (
         <div className="flex flex-col w-full gap-6 p-4 min-h-screen">
-
             <header>
                 <h1 className="text-xl font-semibold mb-4">Mis Proyectos</h1>
             </header>
             <main className="w-full h-full flex flex-1  ">
+                {projects.length === 0 && <NoProjects />}
                 <div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {projects.map((proyecto) => (
@@ -54,7 +58,7 @@ const MyProjects = () => {
                                                     <FolderOpen className="h-6 w-6 text-emerald-600" />
                                                 </div>
 
-                                                    <p>{proyecto.project_name}</p>
+                                                <p>{proyecto.project_name}</p>
                                             </div>
                                             <button className="text-gray-400 hover:text-gray-600">
                                                 <MoreVertical className="h-5 w-5" />
@@ -101,14 +105,19 @@ const MyProjects = () => {
 
                                 {/* Botones de acción */}
                                 <div className="border-t border-gray-200 grid grid-cols-2 divide-x divide-gray-200">
-                                    <button className="py-3 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center">
-                                        <Code className="h-4 w-4 mr-2" />
-                                        Ver código
-                                    </button>
-                                    <button className="py-3 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center">
+                                    <a  href={`/dashboard/projects/${proyecto.id}`} className="py-3 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center">
                                         <FolderOpen className="h-4 w-4 mr-2" />
                                         Abrir proyecto
-                                    </button>
+                                    </a>
+                                    <a
+                                        href={`http://localhost:4321${proyecto.url}/index.html`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="py-3 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center"
+                                    >
+                                        <Globe className="h-4 w-4 mr-2"/>
+                                        Ver proyecto
+                                    </a>
                                 </div>
                             </article>
                         ))}

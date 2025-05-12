@@ -1,6 +1,6 @@
 import MyProjects from "./MyProjects"
-import MenuUser from "../dashboard/MenuUser"
 import Layout from "../../../components/Layout"
+import MenuUser from "../Dashboard/MenuUser"
 
 const MyProjectsMain = () => {
   return (

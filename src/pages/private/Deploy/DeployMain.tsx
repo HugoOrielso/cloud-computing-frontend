@@ -1,5 +1,6 @@
 import Layout from '../../../components/Layout'
-import MenuUser from '../dashboard/MenuUser'
+import MenuUser from '../Dashboard/MenuUser'
+
 import Deploy from './Deploy'
 
 const DeployMain = () => {
