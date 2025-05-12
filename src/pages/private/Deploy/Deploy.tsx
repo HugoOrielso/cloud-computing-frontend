@@ -28,7 +28,7 @@ const Deploy = () => {
                     ))}
                 </nav>
             </section>
-            <section className="max-w-xl mx-auto">
+            <section className="w-full mx-auto">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={selected}

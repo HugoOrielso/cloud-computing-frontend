@@ -106,9 +106,6 @@ const FormDeployFormLocal = () => {
                             <input required type="text" id='projectName' name='projectName' className='p-2 border border-gray-300 w-full rounded focus:border-emerald-400 transition duration-200' />
                         </label>
                     </div>
-                    <label htmlFor="uploadedFrom">
-                        <input name='uploadedFrom' id='uploadedFrom' defaultValue={"local"} type="text" />
-                    </label>
                     <div className='hidden'>
                         <input
                             type="text"
