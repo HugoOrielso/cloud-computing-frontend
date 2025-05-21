@@ -8,12 +8,20 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/es'; // para español
 import NoDeployment from './NoDeployment';
+import ProjectMetricModal from './ProjectMeticModal';
+import SystemMonitorModal from './SystemMonitorModal';
+import ProjectTrafficModal from './ProjectTraficModal';
 
 dayjs.extend(relativeTime);
 dayjs.locale('es')
 const RecentDeploys = () => {
     const axiosAuth = useAxiosAuth();
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedProject, setSelectedProject] = useState<ProyectoMetrica | null>(null);
     const [projects, setProjects] = useState<ProyectoMetrica[]>([])
+    const [showSystemModal, setShowSystemModal] = useState(false);
+    const [showTrafficModal, setShowTrafficModal] = useState(false);
+
     async function getProjects() {
         try {
             const response = await axiosAuth.get<ProyectoMetrica[]>("/files/projects-metricas");
@@ -109,6 +117,32 @@ const RecentDeploys = () => {
                                                         </div>
                                                     }
                                                 </div>
+                                                <div className="p-4 gap-2 h-full flex flex-col">
+                                                    <div className='flex  items-center justify-between'>
+                                                        <button
+                                                            className="text-sm cursor-pointer text-blue-600 hover:underline mt-2"
+                                                            onClick={() => {
+                                                                setSelectedProject(item);
+                                                                setModalOpen(true);
+                                                            }}
+                                                        >
+                                                            Métricas
+                                                        </button>
+                                                        <button
+                                                            className="text-sm cursor-pointer text-blue-600 hover:underline mt-2"
+                                                            onClick={() => setShowSystemModal(true)}
+                                                        >
+                                                            Uso del sistema
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        className="mt-3 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm w-full text-center"
+                                                        onClick={() => setShowTrafficModal(true)}
+                                                    >
+                                                        Tráfico del proyecto
+                                                    </button>
+
+                                                </div>
                                             </div>
                                         </div>
                                     )
@@ -118,6 +152,22 @@ const RecentDeploys = () => {
                     </div>
                 </>
             }
+
+            {selectedProject && (
+                <ProjectMetricModal
+                    isOpen={modalOpen}
+                    setIsOpen={setModalOpen}
+                    project={selectedProject}
+                />
+            )}
+
+            {showSystemModal && (
+                <SystemMonitorModal isOpen={showSystemModal} setIsOpen={setShowSystemModal} />
+            )}
+
+            <ProjectTrafficModal isOpen={showTrafficModal} setIsOpen={setShowTrafficModal} />
+
+
         </div>
     )
 }

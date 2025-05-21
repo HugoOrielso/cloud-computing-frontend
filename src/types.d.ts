@@ -25,6 +25,8 @@ interface ProyectoMetrica {
     num_css_files: number;
     num_js_files: number;
     size_mb: number;
+      referencias_externas: number; // <--- agrega esto
+
     has_index_html: boolean;
     commit_hash?: string;
     commit_message?: string;

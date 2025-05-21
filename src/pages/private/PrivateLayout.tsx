@@ -7,12 +7,21 @@ const PrivateLayout = () => {
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
 
   useEffect(() => {
-    axiosAuth.get('/users/auth')
-      .then(() =>  
-        setIsAuth(true))
-      .catch((e) => {console.log(e)
-       setIsAuth(false)});
+    const checkAuth = async () => {
+      try {
+        const response = await axiosAuth.get('/users/auth');
+        if(response.status === 200){
+          setIsAuth(true);
+        }
+      } catch (error) {
+        console.error('❌ Error de autenticación:', error);
+        setIsAuth(false);
+      }
+    };
+
+    checkAuth();
   }, [axiosAuth]);
+
 
   if (isAuth === null) return <p>Cargando...</p>;
   return isAuth ? <Outlet /> : <Navigate to="/login" />;
