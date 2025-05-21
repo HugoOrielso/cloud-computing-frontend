@@ -10,8 +10,8 @@ export default function FileViewer({ files }: { files: File[] }) {
     const activeFile = files.find((f) => f.filename === selected);
 
     return (
-        <div className="mt-6">
-            <nav className="flex gap-2 border-b pb-2">
+        <div className="">
+            <nav className="flex gap-2 ">
                 {files.map((file) => (
                     <button
                         key={file.filename}
@@ -26,7 +26,7 @@ export default function FileViewer({ files }: { files: File[] }) {
                 ))}
             </nav>
 
-            <section className="mt-4 bg-gray-900 text-white rounded-lg overflow-hidden">
+            <section className="p-4 bg-gray-900 text-white  overflow-hidden">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={selected}

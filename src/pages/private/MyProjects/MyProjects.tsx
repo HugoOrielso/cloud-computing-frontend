@@ -103,7 +103,6 @@ const MyProjects = () => {
                                     </div>
                                 </div>
 
-                                {/* Botones de acción */}
                                 <div className="border-t border-gray-200 grid grid-cols-2 divide-x divide-gray-200">
                                     <a  href={`/dashboard/projects/${proyecto.id}`} className="py-3 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center">
                                         <FolderOpen className="h-4 w-4 mr-2" />

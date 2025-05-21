@@ -33,12 +33,16 @@ const SingleProject = () => {
     return (
         <div className="flex flex-col w-full gap-6 p-4 min-h-screen">
             <header>
-                <h1 className="text-xl font-semibold mb-4">Proyecto {id}</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-xl font-semibold mb-4">Proyecto {id}</h1>
+                    <button className="bg-red-500 cursor-pointer border border-red-400 focus:border-red-600 text-white p-3 rounded">
+                        Delete
+                    </button>
+                </div>
             </header>
             <main>
                 {project && (
                     <>
-                        <h2 className="text-lg font-medium mb-2">{project.project_name}</h2>
                         {files.length > 0 ? (
                             <FileViewer files={files} />
                         ) : (

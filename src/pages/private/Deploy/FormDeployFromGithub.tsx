@@ -48,8 +48,8 @@ const FormDeployFromGithub = () => {
         }
     }
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden w-full items-center justify-center flex flex-col h-full">
+            <div className="p-6 border border-gray-200 rounded-lg mt-6">
                 <div className="flex items-center justify-center mb-4">
                     <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
                         <Github className="h-6 w-6 text-emerald-600 dark:text-emerald-300" />
